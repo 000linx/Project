@@ -1,0 +1,24 @@
+[  
+    {
+        "noticeid":1,
+        "publisher":"admin",
+        "date":"2018-01-01",
+        "title":"这是标题",
+        "content":"这是一条通知"
+    },
+    {
+        "noticeid":2,
+        "publisher":"admin",
+        "date":"2018-07-01",
+        "title":"这是标题",
+        "content":"这是一条通知2"
+    },
+    {
+        "noticeid":3,
+        "publisher":"admin",
+        "date":"2019-01-01",
+        "title":"这是标题",
+        "content":"这是一条通知3"
+    }
+
+]

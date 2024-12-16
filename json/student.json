@@ -1,0 +1,29 @@
+[
+    {
+        "name":"test1",
+        "stuid":"202202060222",
+        "password":"scrypt:32768:8:1$ZHt3LhYMIpFzrrVB$fe1b2419c9e79c0d82ea64a41bd1e680ab24348ff3a0b94e84e2983fd01eb83bb010c8f64f61d2d541a63d97a67490dbe272d44a567f428d1289568298a9f590",
+        "className":"软工222",
+        "phone":"132456",
+        "dormitoryid":"1-2-510"
+
+    },
+    {
+        "name":"test2",
+        "stuid":"202202060223",
+        "password":"scrypt:32768:8:1$SimM3aP7U1ezmJph$a04320e94b1b75af608fd37442dec8574eb4ec5d6e531efda15acd256d6c88f983e61057673df947c85caf8c8639316716f32e4c339c25c433e6112f5ab0d863",
+        "className":"软工221",
+        "phone":"13212sads",
+        "dormitoryid":"1-3-510"
+
+    },
+    {
+        "name":"test3",
+        "stuid":"202202060224",
+        "password":"scrypt:32768:8:1$wKlNkeMSGNxftITE$3099733b1a5214986f909f4a65449b22ddbbdec4170bb6c1dc727c105ce3944475e3e11d16542044f57b755c6a2dc5664b7a729cc3ab2cd9ea57ed3b49342ba6",
+        "className":"软工222",
+        "phone":"sdasdad",
+        "dormitoryid":"1-4-511"
+
+    }
+]

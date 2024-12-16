@@ -1,0 +1,26 @@
+[
+    {
+        "name": "test1",
+        "stuid":"202202060222",
+        "dormitoryid":"1-2-510",
+        "repairtime":"2023-01-01",
+        "repairinfo":"水管漏水",
+        "status":"未处理"
+    },
+    {
+        "name": "test2",
+        "stuid":"202202060223",
+        "dormitoryid":"1-2-510",
+        "repairtime":"2023-01-01",
+        "repairinfo":"空调漏水",
+        "status":"已处理"
+    },
+    {
+        "name": "test3",
+        "stuid":"202202060224",
+        "dormitoryid":"1-2-510",
+        "repairtime":"2023-01-01",
+        "repairinfo":"电视坏了",
+        "status":"未处理"
+    }
+]

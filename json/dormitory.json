@@ -1,0 +1,51 @@
+[
+    {
+        "dormitoryid": "1-2-510",
+        "counselor":{
+            "name": "王二",
+            "phone": "13612345670"
+        },
+        "check-in-info":[
+            {
+                "name": "张三",
+                "phone": "13612345678",
+                "check-in-bed": "1"
+            },
+            {
+                "name": "李四",
+                "phone": "13612345679",
+                "check-in-bed": "2"
+            },
+            {
+                "name": "王五",
+                "phone": "13612345680",
+                "check-in-bed": "3"
+            }
+        ],
+        "equipment": "无"
+    },
+    {
+        "dormitoryid": "1-2-511",
+        "counselor":{
+            "name": "李三",
+            "phone": "13612345671"
+        },
+        "check-in-info":[
+            {
+                "name": "赵六",
+                "phone": "13612345681",
+                "check-in-bed": "1"
+            },
+            {
+                "name": "田七",
+                "phone": "13612345682",
+                "check-in-bed": "2"
+            },
+            {
+                "name": "孙八",
+                "phone": "13612345683",
+                "check-in-bed": "3"
+            }
+        ]
+    }
+]
