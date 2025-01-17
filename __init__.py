@@ -4,13 +4,15 @@ from utils import blacklist
 from flask_cors import CORS
 from stu_module import stu_bp
 from admin_module import admin_bp
+from common import common_bp
 from flask_jwt_extended import JWTManager
 # from test import test_bp
 
 app = Flask(__name__)
 app.register_blueprint(stu_bp)
 app.register_blueprint(admin_bp)
-# app.register_blueprint(test_bp)
+app.register_blueprint(common_bp)
+
 
 # JWT配置
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
@@ -20,7 +22,7 @@ app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 jwt = JWTManager(app)
 
 
-
+# 检查token是否在黑名单中
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blacklist(jwt_header, jwt_payload):
     jti = jwt_payload['jti']

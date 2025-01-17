@@ -16,21 +16,10 @@ admin_bp = Blueprint('admin', __name__)
 # 管理员登录
 @admin_bp.route('/adminLogin', methods=['POST'])
 def login():
-    data = request.get_json()
-    teacherid = data['teacherid']
-    password = data['password']
-    admin = admin_collection.find_one({'username': teacherid})
-    if admin is not None:
-        if check_password_hash(admin['password'],password):
-            access_token = create_access_token(indentity = generate_identity(teacherid))
-            return jsonify({'message':'登录成功','access_token':access_token}),200
-        else:
-            return jsonify({'message':'密码错误'}),400
-    else:
-        return jsonify({'message':'用户名错误'}),400
-    
-# 修改管理信息
-@admin_bp.route('/adminUpdate', methods=['POST'])
-def admin_update():
-    data = request.get_json()
+    try:
+        data = request.get_json()
+        
+    except Exception as e:
+        return jsonify({"发生异常":str(e)}), 400
+
     

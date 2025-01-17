@@ -47,7 +47,6 @@ def send_email(recipient,verification_code):
         server.login(sender_email, sender_password)
         server.sendmail(sender_email, [recipient], msg.as_string())
         server.quit()
-
         return True
     except Exception as e:
         print(f"Error: {e}")
