@@ -4,7 +4,7 @@
         "StudentID":"202202060222",
         "password":"scrypt:32768:8:1$q8Efpdu5SjNG6fbf$c5597b3cedda4a7d49035decf2214d16acc51a415f713d7b10635e41f9706f61321464831125db2918e3ed3cb377f32cc89d9dde1695d5fba0b89fee0d84fe9d",
         "DormitoryBuilding":"空港校区1号楼",
-        "DormitoryNo.":"1-2-551",
+        "DormitoryID":"1-2-551",
         "BedNumber":"1号床",
         "BaseInfo":{
             "Name":"学生1",
@@ -55,6 +55,9 @@
     {
         "StudentID":"202202060223",
         "password":"scrypt:32768:8:1$aWoLiW8ftQuc7XZ3$332a40e1e6372c8176813a6e5f7b2359dcd982f39bfc56efcdec333851f99c1476de9c885a053691b8773b3664369dec30600d6927dab04d3a7b5b0ecec8cf35",
+        "DormitoryBuilding":"空港校区1号楼",
+        "DormitoryID":"1-2-551",
+        "BedNumber":"2号床",
         "BaseInfo":{
             "Name":"学生2",
             "StudentID":"202202060223",
@@ -114,6 +117,9 @@
     {
         "StudentID":"202202060224",
         "password":"scrypt:32768:8:1$zMh7N1m8R0P6kC1z$b02107473e900ddc9cbb1a2a5ec19bc369b35ad86a89a4cd29e8e1e43fb992ce9ae0d2be5adce7ca391afa14dcf35b974588aec14cdadd7a5f3e90408082e5c1",
+        "DormitoryBuilding":"空港校区1号楼",
+        "DormitoryID":"1-2-551",
+        "BedNumber":"3号床",
         "BaseInfo":{
             "Name":"学生3",
             "StudentID":"202202060224",

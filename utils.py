@@ -24,6 +24,9 @@ def check_identity(identity, id):
 def generate_verification_code(length=6):
     return ''.join(random.choices(string.digits, k=length))
 
+# 生成随机OnlyID
+def generate_OnlyID():
+    return ''.join(random.choices(string.digits, k=10))
 # 发送邮件
 def send_email(recipient,verification_code):
     # 第三方 SMTP 服务

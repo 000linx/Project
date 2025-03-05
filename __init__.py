@@ -6,9 +6,9 @@ from stu_module import stu_bp
 from admin_module import admin_bp
 from common import common_bp
 from flask_jwt_extended import JWTManager
-# from test import test_bp
 
 app = Flask(__name__)
+app.secret_key = "linx000"
 app.register_blueprint(stu_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(common_bp)
@@ -27,7 +27,13 @@ jwt = JWTManager(app)
 def check_if_token_in_blacklist(jwt_header, jwt_payload):
     jti = jwt_payload['jti']
     return jti in blacklist
+
+
+
+
 CORS(app)
 
 if __name__ == '__main__':
-    app.run(port=4000)
+    app.run('192.168.31.55',port=4000, debug=True)
+    #app.run('192.168.43.113',port=4000, debug=True)
+    #app.run(port=4000, debug=True)

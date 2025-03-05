@@ -5,7 +5,7 @@ from email.header import Header
 from flask import Blueprint, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import get_jwt_identity,create_access_token, jwt_required
-#from flask_principal import Principal,Identity,generate_identity,check_identity,Permission,RoleNeed
+from flask_principal import Principal,Identity,generate_identity,check_identity,Permission,RoleNeed
 
 test_bp = Blueprint('test', __name__)
 # 创建权限管理对象

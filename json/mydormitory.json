@@ -1,0 +1,166 @@
+[
+    {
+        "DormitoryID": "1-2-510",
+        "location": "空港校区一号楼",
+        "myBedNumber": "4号床",
+        "roommate_info":[
+            {
+                "BedNumber": "1号床",
+                "Name": "张三",
+                "StudentID":"202202060222",
+                "Professional":"软件工程",
+                "Class":"软件工程222班",
+                "phone":"1111111111"
+            },
+            {
+                "BedNumber": "2号床",
+                "Name": "李四",
+                "StudentID":"202202060223",
+                "Professional":"软件工程",
+                "Class":"软件工程222班",
+                "phone":"1111111112"
+            }
+        ],
+        "equipments":[
+            {
+                "name":"门",
+                "state":"正常"
+            },
+            {
+                "name":"窗户",
+                "state":"维修中"
+                
+            },
+            {
+                "name":"窗帘",
+                "state":"正常"
+            },
+            {
+                "name":"桌子",
+                "state":"正常"
+            },
+            {
+                "name":"衣柜",
+                "state":"正常"
+            },
+            {
+                "name":"空调",
+                "state":"正常"
+            },
+            {
+                "name":"床架",
+                "state":"正常"
+            },
+            {
+                "name":"水龙头",
+                "state":"正常"
+            },
+            {
+                "name":"花洒",
+                "state":"正常"
+            },
+            {
+                "name":"热水器",
+                "state":"正常"
+            },
+            {
+                "name":"洗衣机",
+                "state":"正常"
+            },
+            {
+                "name":"灯",
+                "state":"正常"
+            },
+            {
+                "name":"插座",
+                "state":"正常"
+            },
+            {
+                "name":"开关",
+                "state":"正常"
+            }
+        ]
+    },
+    {
+        "DormitoryID": "1-2-511",
+        "location": "空港校区一号楼",
+        "myBedNumber": "4号床",
+        "roommate_info":[
+            {
+                "BedNumber": "1号床",
+                "Name": "张三",
+                "StudentID":"202202060222",
+                "Professional":"软件工程",
+                "Class":"软件工程222班",
+                "phone":"1111111111"
+            },
+            {
+                "BedNumber": "2号床",
+                "Name": "李四",
+                "StudentID":"202202060223",
+                "Professional":"软件工程",
+                "Class":"软件工程222班",
+                "phone":"1111111112"
+            }
+        ],
+        "equipments":[
+            {
+                "name":"门",
+                "state":"正常"
+            },
+            {
+                "name":"窗户",
+                "state":"维修中"
+                
+            },
+            {
+                "name":"窗帘",
+                "state":"正常"
+            },
+            {
+                "name":"桌子",
+                "state":"正常"
+            },
+            {
+                "name":"衣柜",
+                "state":"正常"
+            },
+            {
+                "name":"空调",
+                "state":"正常"
+            },
+            {
+                "name":"床架",
+                "state":"正常"
+            },
+            {
+                "name":"水龙头",
+                "state":"正常"
+            },
+            {
+                "name":"花洒",
+                "state":"正常"
+            },
+            {
+                "name":"热水器",
+                "state":"正常"
+            },
+            {
+                "name":"洗衣机",
+                "state":"正常"
+            },
+            {
+                "name":"灯",
+                "state":"正常"
+            },
+            {
+                "name":"插座",
+                "state":"正常"
+            },
+            {
+                "name":"开关",
+                "state":"正常"
+            }
+        ]
+    }
+]

@@ -1,8 +1,20 @@
 [
     {
-
+        "Title": "退宿申请",
+        "StudentName":"张三",
+        "StudentID":"202202060222",
+        "DormitoryID":"1-2-510",
+        "Reason":"毕业",
+        "Statue":"待审核",
+        "OnlyID":"1111"
     },
     {
-        
+        "Title": "退宿申请",
+        "StudentName":"李四",
+        "StudentID":"202202060232",
+        "DormitoryID":"1-2-510",
+        "Reason":"毕业",
+        "Statue":"待审核",
+        "OnlyID":"1112"
     }
 ]
