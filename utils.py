@@ -27,6 +27,7 @@ def generate_verification_code(length=6):
 # 生成随机OnlyID
 def generate_OnlyID():
     return ''.join(random.choices(string.digits, k=10))
+
 # 发送邮件
 def send_email(recipient,verification_code):
     # 第三方 SMTP 服务
@@ -37,7 +38,7 @@ def send_email(recipient,verification_code):
         sender_email = 'your_email@qq.com'
         sender_password = 'your_smtp_password'  # QQ邮箱的SMTP授权码
 
-        message = f'【学生服务】你正在使用邮箱验证功能，你的验证码是：{verification_code},有效期5分钟。如非本人操作请忽略'
+        message = f'【宿舍服务】你正在使用邮箱验证功能，你的验证码是：{verification_code},有效期5分钟。如非本人操作请忽略'
         subject = '邮箱验证'
         # 创建邮件内容
         msg = MIMEText(message, 'plain', 'utf-8')
