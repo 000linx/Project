@@ -46,21 +46,21 @@ stu_bp = Blueprint('stu', __name__)
 def login():
     data = request.get_json()
     if data is None:
-        raise Exception('错误0:请求参数为空')
+        raise Exception('请求参数为空')
     try:
         account = data['StudentID']
         password = data['password']
         if account is None or password is None:
-            raise Exception('错误1:账号或密码为空')
+            raise Exception('账号或密码为空')
         student = stu_collection.find_one({ "account": account })
         if student is not None:
             if check_password_hash(student['password'], password):
                 access_token = create_access_token(identity=generate_identity(account))
                 return jsonify({'message': '登录成功', 'access_token': access_token}), 200
             else:
-                raise Exception('错误2:密码错误') 
+                raise Exception('密码错误') 
         else:
-            raise Exception('错误3:用户不存在') 
+            raise Exception('用户不存在') 
     except Exception as e:
         return jsonify({"发生异常":str(e)}), 400
     
@@ -72,9 +72,9 @@ def logout():
     current_user = get_jwt_identity()
     try:
         if StudentID is None:
-            raise Exception('错误0:学号为空')
+            raise Exception('学号为空')
         if check_identity(current_user,StudentID) == False:
-            raise Exception('错误1:用户错误')
+            raise Exception('用户错误')
         add_token_to_blacklist(get_jwt())
         return jsonify({'message': '退出成功'}), 200
     except Exception as e:
@@ -88,10 +88,10 @@ def forget_pwd():
         account = data['account']
         password = data['password']
         if account is None or password is None:
-            raise Exception('错误0:账号或密码为空')
+            raise Exception('账号或密码为空')
         stu = stu_collection.find_one({'account': account})
         if stu is None:
-            raise Exception('错误1:用户不存在')
+            raise Exception('用户不存在')
         stu_collection.update_one({'account': account}, {'$set': {'password': generate_password_hash(password)}})
         return jsonify({'message': '修改成功'}), 200
     except Exception as e:
@@ -134,12 +134,12 @@ def get_info():
     try:   
         account = data['StudentID']
         if account is None:
-            raise Exception('错误0:学号为空')
+            raise Exception('学号为空')
         if check_identity(current_user, account) == False:
-           raise Exception('错误1:用户错误') 
+           raise Exception('用户错误') 
         stu = stu_collection.find_one({'account': account},{filed: 0 for filed in excluded_fields})
         if stu is None:
-            raise Exception('错误2:用户不存在')
+            raise Exception('用户不存在')
         return jsonify({'message': '获取成功','stu_data':stu}), 200
     except Exception as e:
         return jsonify({"发生异常":str(e)}), 400
@@ -154,7 +154,7 @@ def update_info():
        current_user = get_jwt_identity()
        account = info['account']
        if check_identity(current_user, account) == False:
-           raise Exception('错误0:用户错误')
+           raise Exception('用户错误')
        Role = info['Role']
        DormitoryBuilding = info['DormitoryBuilding']
        DormitoryID = info['DormitoryID']
@@ -179,13 +179,13 @@ def stu_notice():
         StudentID = data['StudentID']
         NoticeID = data['NoticeID']
         if StudentID is None or NoticeID is None:
-            raise Exception('错误0:学号或通知id为空')
+            raise Exception('学号或通知id为空')
         current_user = get_jwt_identity()
         if check_identity(current_user, StudentID) == False:
-            raise Exception('错误1:当前用户错误')
+            raise Exception('当前用户错误')
         notice = notice_collection.find_one({'Noticeid': NoticeID},{'_id':0})
         if notice is None:
-            raise Exception('错误2:当前通知不存在')
+            raise Exception('当前通知不存在')
         return jsonify({'message': '获取成功','notice':notice}), 200
     except Exception as e:
         return jsonify({"发生异常":str(e)}), 400
@@ -200,7 +200,7 @@ def get_notice():
         StudentID = data['StudentID']
         current_user = get_jwt_identity()
         if check_identity(current_user, StudentID) == False:
-            raise Exception('错误0:当前用户错误')
+            raise Exception('当前用户错误')
         notices = notice_collection.find({},{'_id':0})
         if notices is None: 
             return jsonify({'message': '当前通知为空'}), 200
@@ -239,10 +239,13 @@ def repair_apply():
         equipments_list = equipments['equipments']
         for item in equipments_list:
             if item['name'] == Equipment:
-                mydormitory_collection.update_one(
-                {'DormitoryID':DormitoryID,'equipments.name':Equipment},
-                {'$set':{'equipments.$.state':'损坏'}}
-                )
+                if item['name'] == '正常':
+                    mydormitory_collection.update_one(
+                    {'DormitoryID':DormitoryID,'equipments.name':Equipment},
+                    {'$set':{'equipments.$.state':'损坏'}}
+                    )
+                else:
+                    raise Exception("当前设备已报修")
         dormitorynotice_collection.insert_one(
             {
             'Title':'报修申请',
@@ -284,12 +287,11 @@ def get_repairs():
         data = request.get_json()
         StudentID = data['StudentID']
         Title = data['Title']
-
         current_user = get_jwt_identity()
         if check_identity(current_user, StudentID) == False:
             raise Exception('当前用户错误')
-        apply_a = dormitorynotice_collection.find({'StudentID': StudentID,'Title':Title},{'_id':0})
-        apply_b = dormitorynotice_collection.find({'NewStudentID': StudentID,'Title':Title},{'_id':0})
+        apply_a = dormitorynotice_collection.find({'StudentID': StudentID,'Title':Title},{'_id':0}).sort("Dealtime",-1)
+        apply_b = dormitorynotice_collection.find({'NewStudentID': StudentID,'Title':Title},{'_id':0}).sort("Dealtime",-1)
         if apply_a is None and apply_b is None:
             return jsonify({'message': '当前无申请记录'}), 200
         apply_a = list(apply_a)
@@ -325,6 +327,19 @@ def repair_confirm():
                     mydormitory_collection.update_one(
                         {'DormitoryID':DormitoryID,'equipments.name':Equipment},
                         {'$set':{'equipments.$.state':'正常'}}
+                    )
+        elif stuState == '未完成':
+            dormitorynotice_collection.update_one(
+                {'OnlyID':OnlyID,'StudentID':StudentID},
+                {'$set':{'stuState':'待处理'}})
+            Equipment = dormitorynotice_collection.find_one({'OnlyID':OnlyID,'StudentID':StudentID},{'_id':0,'Equipment':1})['Equipment']
+            DormitoryID = dormitorynotice_collection.find_one({'OnlyID':OnlyID,'StudentID':StudentID},{'_id':0,'DormitoryID':1})['DormitoryID']
+            Equipments = mydormitory_collection.find_one({'DormitoryID':DormitoryID},{'_id':0,'equipments':1})['equipments']
+            for item in Equipments:
+                if item['name'] == Equipment:
+                    mydormitory_collection.update_one(
+                        {'DormitoryID':DormitoryID,'equipments.name':Equipment},
+                        {'$set':{'equipments.$.state':'损坏'}}
                     )
         return jsonify({'message': '确认成功'}), 200
     except Exception as e:
@@ -548,7 +563,7 @@ def get_visitors():
         current_user = get_jwt_identity()
         if check_identity(current_user, StudentID) == False:
             raise Exception('当前用户错误')
-        visitors = visitor_collection.find({'StudentID':StudentID},{'_id':0})
+        visitors = visitor_collection.find({'StudentID':StudentID},{'_id':0}).sort("Visitorinfo.Dealtime",-1)
         if visitors is not None:
             visitors_list = []
             for visitor in visitors:
@@ -623,24 +638,4 @@ def agree_visitor():
         return jsonify({"发生异常":str(e)}), 400
 
 
-# # 取消访问申请
-# @stu_bp.route('/StuCancelVisitor', methods=['POST'])
-# @jwt_required()
-# def cancel_visitor():
-#     try:
-#         data = request.get_json()
-#         StudentID = data['StudentID']
-#         VisitorID = data['VisitorID']
-#         current_user = get_jwt_identity()
-#         if check_identity(current_user, StudentID) == False:
-#             raise Exception('当前用户错误')
-#         visitor = visitor_collection.find_one({'StudentID':StudentID,'VisitorID':VisitorID})
-#         if visitor is not None:
-#             visitor_collection.delete_one({'StudentID':StudentID,'VisitorID':VisitorID})
-#             return jsonify({'message':'取消成功'}), 200
-#         else:
-#             raise Exception('当前访客不存在')
-#     except Exception as e:
-#         return jsonify({"发生异常":str(e)}), 400
 
-#####################################################################################################

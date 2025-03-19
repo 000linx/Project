@@ -23,7 +23,8 @@ admin_bp = Blueprint('admin', __name__)
 '''
 管理端接口统计
 '''
-
+#######################################################################################################
+# 管理员操作
 # 管理员登录
 @admin_bp.route('/adminLogin', methods=['POST'])
 def login():
@@ -32,12 +33,12 @@ def login():
         account = data['account']
         password = data['password']
         if account is None or password is None:
-            raise Exception("错误0:账户或密码为空")
+            raise Exception("账户或密码为空")
         admin = admin_collection.find_one({'account':account})
         if admin is None:
-            raise Exception("错误1:用户不存在")
+            raise Exception("用户不存在")
         if not check_password_hash(admin['password'],password):
-            raise Exception("错误2:密码错误")
+            raise Exception("密码错误")
         access_token = create_access_token(identity=generate_identity(account))
         return jsonify({'messange':'登录成功','access_token':access_token}), 200
     except Exception as e:
@@ -51,9 +52,9 @@ def logout():
     current_user = get_jwt_identity()
     try:
         if account is None:
-            raise Exception("错误0:账户为空")
+            raise Exception("账户为空")
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         add_token_to_blacklist(get_jwt())
         return jsonify({'message': '退出成功'}), 200
     except Exception as e:
@@ -67,8 +68,28 @@ def adminInfo():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         admin = admin_collection.find_one({'account':account},{'_id':0,'password':0})
+        return jsonify(admin),200
+    except Exception as e:
+        return jsonify("发生异常",str(e)),400
+######################################################################################################
+# 管理员管理
+# 查看单个管理员
+@admin_bp.route('/checkAdmin', methods=['POST'])
+@jwt_required()
+def checkAdmin():
+    try:
+        current_user = get_jwt_identity()
+        account = request.get_json()['account']
+        TeacherID = request.get_json()['TeacherID']
+        if check_identity(current_user,account) == False:
+            raise Exception("用户错误")
+        if TeacherID is None:
+            raise Exception("账户为空")
+        admin = admin_collection.find_one({'TeacherID':TeacherID},{'_id':0,'password':0})
+        if admin is None:
+            raise Exception("管理员不存在")
         return jsonify(admin),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
@@ -82,16 +103,40 @@ def updateAdmin():
         current_user = get_jwt_identity()
         account = data['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         Name = data['Name']
         Position = data['Position']
-        TeacherID = data['TeacherID']
         PhoneNumber = data['PhoneNumber']
         Email = data['Email']
-        if Name is None or Position is None or TeacherID is None or PhoneNumber is None or Email is None:
+        PhoneNumber = data['PhoneNumber']
+        if Name is None or Position is None or PhoneNumber is None or Email is None:
             raise Exception("参数缺少")
-        admin_collection.update_one({"account":account},{"$set":{"Name":Name,"Position":Position,"TeacherID":TeacherID,"PhoneNumber":PhoneNumber,"Email":Email}})
+        admin_collection.update_one({"account":account},{"$set":{"Name":Name,"Position":Position,"PhoneNumber":PhoneNumber,"Email":Email,"PhoneNumber":PhoneNumber}})
         return jsonify({"message":"修改成功"}),200
+    except Exception as e:
+        return jsonify("发生异常",str(e)),400
+    
+# 重置密码
+@admin_bp.route('/resetAdminPassword', methods=['POST'])
+@jwt_required()
+def forgetPassword():
+    try:
+        data = request.get_json()   
+        account = data['account']
+        current_user = get_jwt_identity()
+        if check_identity(current_user,account) == False          :
+            raise Exception("用户错误") 
+        TeacherID = data['TeacherID']
+        print(TeacherID)
+        admin = admin_collection.find_one({'account':account})
+        if admin is None:
+            raise Exception("用户不存在")
+        if admin['Role'] != 'superadmin':
+            raise Exception("权限不足")
+        password = TeacherID
+        password = generate_password_hash(password)
+        admin_collection.update_one({"TeacherID":TeacherID},{"$set":{"password":password}})
+        return jsonify({"message":"重置成功"}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
     
@@ -103,19 +148,21 @@ def addAdmin():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
+        Role = admin_collection.find_one({'account':account})['Role']
+        if Role != 'superadmin':
+            raise Exception("权限不足")
         data = request.get_json()
         Name = data['Name']
         Position = data['Position']
         TeacherID = data['TeacherID']
         PhoneNumber = data['PhoneNumber']
-        account = data['Newaccount']
-        password = data['password']
+        password = TeacherID
         Email = data['Email']
         password = generate_password_hash(password)
         if account is None or password is None:
             raise Exception("参数缺少")
-        admin_collection.insert_one({"Name":Name,'Role':'admin',"Position":Position,"TeacherID":TeacherID,"PhoneNumber":PhoneNumber,"Email":Email,"account":account,"password":password})
+        admin_collection.insert_one({"Name":Name,'Role':'admin',"Position":Position,"TeacherID":TeacherID,"PhoneNumber":PhoneNumber,"Email":Email,"account":TeacherID,"password":password})
         return jsonify({"message":"添加成功"}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
@@ -129,17 +176,33 @@ def deleteAdmin():
         account = data['account']
         current_user = get_jwt_identity()
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         TeacherID = data['TeacherID']
         if account is None or TeacherID is None:
             raise Exception("参数缺少")
         if account is None:
-            raise Exception("错误0:账户为空")
+            raise Exception("账户为空")
         admin_collection.delete_one({"account":account})
         return jsonify({"message":"删除成功"}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
     
+# 查看全部管理员
+@admin_bp.route('/checkAllAdmin', methods=['POST'])
+@jwt_required()
+def checkAllAdmin():
+    try:
+        current_user = get_jwt_identity()
+        data  = request.get_json()
+        account = data['account']
+        if check_identity(current_user,account) == False:
+            raise Exception("当前身份错误")
+        admins = admin_collection.find({},{'_id':0,'password':0})
+        admin_list = list(admins)
+        return jsonify(admin_list),200
+    except Exception as e:
+        return jsonify("发生异常",str(e)),400
+
 # 管理忘记密码
 @admin_bp.route('/adminForgetPwd', methods=['POST'])
 def adminforgetPassword():
@@ -179,7 +242,36 @@ def changepwd():
             raise Exception('旧密码错误')
     except Exception as e:
         return jsonify({"发生异常":str(e)}), 400
+    
+    # 查看单个宿舍
 
+# 单个宿舍信息
+@admin_bp.route('/dormitoryInfo', methods=['POST'])
+@jwt_required()
+def dormitoryInfo():
+    try:
+        data = request.get_json()
+        account = data['account']
+        DormitoryID = data['DormitoryID']
+        if account is None or DormitoryID is None:
+            raise Exception("参数缺少")
+        current_user = get_jwt_identity()
+        if check_identity(current_user,account) == False:
+            raise Exception("用户错误")
+        dormitory = mydormitory_collection.find_one({"DormitoryID":DormitoryID},{"_id":0})
+        roommates = dormitory['roommatesinfo']
+        roommates_list = []
+        for item in roommates:
+            # 用get方法获取值，避免出现空字符串，空列表错误，
+            if item.get('StudentID'):
+                roommates_list.append(item)
+        dormitory['roommatesinfo'] = roommates_list
+        return jsonify(dormitory),200
+    except Exception as e:
+        return jsonify("发生异常",str(e)),400
+
+################################################################################################
+# 宿舍申请管理
 # 申请处理
 @admin_bp.route('/dormApply', methods=['POST'])
 @jwt_required()
@@ -192,7 +284,7 @@ def apply():
         State = request.get_json()['State']
         Dealtime = datetime.now().strftime("%Y-%m-%d %H:%M")
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         if OnlyID is None:
             raise Exception("参数缺少")
         if Title == '报修申请':
@@ -206,6 +298,14 @@ def apply():
                     {'DormitoryID':DormitoryID,'equipments.name':Equipment},
                     {'$set':{'equipments.$.state':'维修中'}}
                     )
+        elif Title == '退宿申请':
+            StudentID = dormitorynotice_collection.find_one({"OnlyID":OnlyID})['StudentID']
+            DormitoryID = dormitorynotice_collection.find_one({"OnlyID":OnlyID})['DormitoryID']
+            mydormitory_collection.update_one(
+                {'DormitoryID':DormitoryID},
+                {'$pull':{'roommatesinfo':{'StudentID':StudentID}}}
+            )
+            stu_collection.delete_one({"account":StudentID})
         dormitorynotice_collection.update_one({"OnlyID":OnlyID},{"$set":{"State":State,"Dealtime":Dealtime}})
         return jsonify("处理成功"),200
     except Exception as e:
@@ -221,7 +321,7 @@ def adminAgreeChange():
         account = data['account']
         OnlyID = data['OnlyID']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         StudentA_id = data['StudentA_id']
         StudentB_id = data['StudentB_id'] 
         if StudentA_id is None or StudentB_id is None:
@@ -234,7 +334,7 @@ def adminAgreeChange():
         StudentB = next((s for s in dormB['roommatesinfo'] if s['StudentID'] == StudentB_id), None)
 
         if StudentA is None or StudentB is None:
-            raise Exception("错误3:学生不存在")
+            raise Exception("学生不存在")
         
         # 同宿舍对调
         if dormA['DormitoryID'] == dormB['DormitoryID']:
@@ -265,7 +365,7 @@ def adminAgreeChange():
             stu_collection.update_one({"account":StudentA_id},{"$set":{"BedNumber":StudentB['BedNumber']}})
             stu_collection.update_one({"account":StudentB_id},{"$set":{"BedNumber":StudentA['BedNumber']}})
             if resultA.modified_count == 0 and resultB.modified_count == 0:
-                raise Exception("错误4:调换失败")
+                raise Exception("调换失败")
         else:
             # 跨宿舍调换
             # 先将A换到B
@@ -302,7 +402,7 @@ def adminAgreeChange():
             stu_collection.update_one({"account":StudentB_id},{"$set":{"DormitoryID":StudentA['DormitoryID']}})
 
             if resultA.modified_count == 0 and resultB.modified_count == 0:
-                raise Exception("错误4:调换失败")
+                raise Exception("调换失败")
 
         Applytime = datetime.now().strftime("%Y-%m-%d %H:%M")
         dormitorynotice_collection.update_one({"OnlyID":OnlyID},{"$set":{"State":'已处理','Applytime':Applytime}})
@@ -320,7 +420,7 @@ def adminChange():
         account = data['account']
         OnlyID = data['OnlyID']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         StudentA_id = data['StudentA_id']
         Target_id = data['Target_id']
         Empty_Bed = data['Empty_Bed']
@@ -336,7 +436,7 @@ def adminChange():
         for item in Bed:
             if item['BedNumber'] == Empty_Bed:
                 if item['StudentID'] is not None:
-                    raise Exception("错误2:该床位已被占")
+                    raise Exception("该床位已被占")
         mydormitory_collection.update_one(
             {
             "DormitoryID":Target_id,"roommatesinfo.BedNumber":Empty_Bed
@@ -359,7 +459,6 @@ def adminChange():
         return jsonify("处理成功"),200
     except Exception as e:
         return jsonify("发生异常", str(e)),400
-
              
 # 查看单个宿舍申请
 @admin_bp.route('/checkDormApply', methods=['POST'])
@@ -370,11 +469,11 @@ def dormNotice():
         current_user = get_jwt_identity()
         account = data['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         OnlyID = data['OnlyID']
         notice = dormitorynotice_collection.find_one({"OnlyID":OnlyID},{'_id':0})
         if notice is None:
-            raise Exception("错误2:通知不存在")
+            raise Exception("通知不存在")
         return jsonify(notice),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
@@ -388,14 +487,15 @@ def allDormNotice():
         account = request.get_json()['account']
         Title = request.get_json()['Title']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
-        notices = dormitorynotice_collection.find({'Title':Title},{'_id':0})
+            raise Exception("用户错误")
+        notices = dormitorynotice_collection.find({'Title':Title},{'_id':0}).sort("Dealtime",-1)
         notices_list = list(notices)
         return jsonify(notices_list),200        
     except Exception as e:
         return jsonify("发生异常",str(e)),400
     
-
+###################################################################################################
+# 宿舍公告管理
 # 发布宿舍通知
 @admin_bp.route('/publishNotice', methods=['POST'])
 @jwt_required()
@@ -404,7 +504,7 @@ def publishNotice():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         data = request.get_json()
         Publisher = data['Publisher']
         Title = data['Title']
@@ -427,7 +527,7 @@ def updateInfo():
         current_user = get_jwt_identity()
         account = data['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         Noticeid = data['Noticeid']
         Title = data['Title']
         Content = data['Content']
@@ -447,7 +547,7 @@ def delete():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         data = request.get_json()
         noticeid = data['Noticeid']
         if noticeid is None:
@@ -483,31 +583,15 @@ def allNotice():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         notices = notice_collection.find({},{'_id':0})
         notices_list = list(notices)
         return jsonify(notices_list),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
-    
-# 查看单个宿舍
-@admin_bp.route('/dormitoryInfo', methods=['POST'])
-@jwt_required()
-def dormitoryInfo():
-    try:
-        data = request.get_json()
-        account = data['account']
-        DormitoryID = data['DormitoryID']
-        if account is None or DormitoryID is None:
-            raise Exception("参数缺少")
-        current_user = get_jwt_identity()
-        if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
-        dormitory = mydormitory_collection.find_one({"DormitoryID":DormitoryID},{"_id":0})
-        return jsonify(dormitory),200
-    except Exception as e:
-        return jsonify("发生异常",str(e)),400
-    
+
+####################################################################################################
+# 访客管理 
 # 管理员访客处理
 @admin_bp.route('/adminAgreeVisitor', methods=['POST'])
 @jwt_required()
@@ -517,7 +601,7 @@ def adminAgreeVisitor():
         current_user = get_jwt_identity()
         account = data['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         VisitorID = data['VisitorID']
         adminState =  data['adminState']
         Applytime = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -538,7 +622,7 @@ def Visitor():
         current_user = get_jwt_identity()
         account = data['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         VisitorID = data['VisitorID']
         if VisitorID is None:
             raise Exception("参数缺少")
@@ -557,22 +641,26 @@ def allVisitors():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
-        visitors = visitor_collection.find({},{"_id":0})
+            raise Exception("用户错误")
+        visitors = visitor_collection.find({},{"_id":0}).sort("Visitorinfo.Dealtime",-1)
         visitors_list = list(visitors)
         return jsonify(visitors_list),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
-    
+
+
+##################################################################################################
+# 学生管理  
 # 添加学生
 @admin_bp.route('/addStudent', methods=['POST'])
 @jwt_required()
 def addStudent():
     try:
         current_user = get_jwt_identity()
+        data = request.get_json()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         data = request.get_json()
         GraduationStatus = data['GraduationStatus']
         Faculty = data['Faculty']
@@ -585,7 +673,7 @@ def addStudent():
         StudentID = data['StudentID']
         Counselor = data['Counselor']
         CounselorPhoneNumber = data['CounselorPhoneNumber']
-        password = data['password']
+        password = StudentID
         password = generate_password_hash(password)
         Building = data['Building']
         DormitoryID = data['DormitoryID']
@@ -610,6 +698,7 @@ def addStudent():
             "GraduationDate":GraduationDate
         }
         stu_collection.insert_one({"account":StudentID,"password":password,"Role":"user","DormitoryBuilding":Building,"DormitoryID":DormitoryID,"BedNumber":BedNumber,"BaseInfo":BaseInfo,"EducationInfo":EducationInfo,})
+        mydormitory_collection.update_one({"DormitoryID":DormitoryID,"roommatesinfo.BedNumber":BedNumber},{"$set":{"roommatesinfo.$.StudentID":StudentID,"roommatesinfo.$.Name":Name,"roommatesinfo.$.Professional":Professional,"roommatesinfo.$.Class":Class}})
         return jsonify({"message":"添加成功"}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
@@ -623,11 +712,8 @@ def updateStudent():
         current_user = get_jwt_identity()
         account = data['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         StudentID = data['StudentID']
-        Building = data['Building']
-        DormitoryID = data['DormitoryID']
-        BedNumber = data['BedNumber']
         Name = data['Name']
         Counselor = data['Counselor']
         CounselorPhoneNumber = data['CounselorPhoneNumber']
@@ -639,14 +725,8 @@ def updateStudent():
         Duration = data['Duration']
         EnrollmentDate = data['EnrollmentDate']
         GraduationDate = data['GraduationDate']
-        if GraduationStatus is None or Faculty is None or Professional is None or Grade is None or Class is None or Duration is None or EnrollmentDate is None or StudentID is None or Counselor is None or CounselorPhoneNumber is None  or Building is None or DormitoryID is None or BedNumber is None or account is None or GraduationDate is None:
+        if GraduationStatus is None or Faculty is None or Professional is None or Grade is None or Class is None or Duration is None or EnrollmentDate is None or StudentID is None or Counselor is None or CounselorPhoneNumber is None or account is None or GraduationDate is None:
                 raise Exception("参数缺少")
-        BaseInfo = {
-        "Name":Name,
-        "StudentID":StudentID,
-        "Counselor":Counselor,
-        "CounselorPhoneNumber":CounselorPhoneNumber,
-        }
         EducationInfo = {
         "GraduationStatus":GraduationStatus,
         "Faculty":Faculty,
@@ -657,7 +737,11 @@ def updateStudent():
         "EnrollmentDate":EnrollmentDate, 
         "GraduationDate":GraduationDate
         }
-        stu_collection.update_one({"account":StudentID},{"$set":{"DormitoryBuilding":Building,"DormitoryID":DormitoryID,"BedNumber":BedNumber,"BaseInfo":BaseInfo,"EducationInfo":EducationInfo,}})
+        stu_collection.update_one({"account":StudentID},{"$set":{
+            "BaseInfo.$.Name":Name,
+            "BaseInfo.$.Counselor":Counselor,
+            "BaseInfo.$.CounselorPhoneNumber":CounselorPhoneNumber,
+            "EducationInfo":EducationInfo}})
         return jsonify({"message":"修改成功"}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
@@ -709,9 +793,32 @@ def allStudentInfo():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         students = stu_collection.find({},{"_id":0,"BaseInfo":1,"EducationInfo":1})
         students_list = list(students)
         return jsonify(students_list),200
+    except Exception as e:
+        return jsonify("发生异常",str(e)),400
+
+# 重置学生密码
+@admin_bp.route('/resetPassword', methods = ['POST'])
+@jwt_required()
+def resetPassword():
+    try:
+        data = request.get_json()
+        account = data['account']
+        admin = admin_collection.find_one({'account':account},{'_id':0})
+        if admin['Role'] != 'superadmin':
+            raise Exception("权限不足")
+        StudentID = data['StudentID']
+        if account is None or StudentID is None:
+            raise Exception("参数缺少")
+        current_user = get_jwt_identity()
+        if check_identity(current_user,account) == False:
+            raise Exception("用户错误")
+        password = StudentID
+        password = generate_password_hash(password)
+        stu_collection.update_one({"account":StudentID},{"$set":{"password":password}})
+        return jsonify({"message":"重置成功"}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400

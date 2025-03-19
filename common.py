@@ -18,10 +18,10 @@ def send_email():
         data = request.get_json()
         recipient = data['recipient'] # 收件人
         if not recipient:
-            raise Exception("错误0:收件人不能为空")
+            raise Exception("收件人不能为空")
         verification_code = generate_verification_code()
         if not send_email(recipient,verification_code):
-            raise Exception("错误1:邮件发送失败")
+            raise Exception("邮件发送失败")
         session['verification_code'] = verification_code
         session.permanent = True
         common_bp.permanent_session_lifetime = timedelta(minutes=5) # 设置session过期时间
@@ -37,7 +37,7 @@ def view():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         dorms = dormitory_collection.find({},{'_id':0})
         dorms_list = list(dorms)
         return jsonify(dorms_list),200        
@@ -52,7 +52,7 @@ def findStudent():
         current_user = get_jwt_identity()
         account = request.get_json()['account']
         if check_identity(current_user,account) == False:
-            raise Exception("错误1:用户错误")
+            raise Exception("用户错误")
         data = request.get_json()
         DormitoryID = data['DormitoryID']
         BedNumber = data['BedNumber']
@@ -60,12 +60,13 @@ def findStudent():
             raise Exception("参数缺少")
         student_info = stu_collection.find_one({"DormitoryID":DormitoryID,"BedNumber":BedNumber},{'_id':0,'BaseInfo':1})
         if student_info is None:
-            raise Exception("错误2:学生不存在")
+            raise Exception("学生不存在")
         StudentName = student_info.get('BaseInfo').get('Name')
         StudentID = student_info.get('BaseInfo').get('StudentID')
         return jsonify({"StudentName":StudentName,"StudentID":StudentID}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400  
+        
 
  # 验证验证码
 @common_bp.route('/verify_code', methods=['POST'])
