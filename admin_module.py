@@ -75,24 +75,6 @@ def adminInfo():
         return jsonify("发生异常",str(e)),400
 ######################################################################################################
 # 管理员管理
-# 查看单个管理员
-@admin_bp.route('/checkAdmin', methods=['POST'])
-@jwt_required()
-def checkAdmin():
-    try:
-        current_user = get_jwt_identity()
-        account = request.get_json()['account']
-        TeacherID = request.get_json()['TeacherID']
-        if check_identity(current_user,account) == False:
-            raise Exception("用户错误")
-        if TeacherID is None:
-            raise Exception("账户为空")
-        admin = admin_collection.find_one({'TeacherID':TeacherID},{'_id':0,'password':0})
-        if admin is None:
-            raise Exception("管理员不存在")
-        return jsonify(admin),200
-    except Exception as e:
-        return jsonify("发生异常",str(e)),400
 
 # 修改管理员信息
 @admin_bp.route('/updateAdmin', methods=['POST'])
@@ -186,7 +168,26 @@ def deleteAdmin():
         return jsonify({"message":"删除成功"}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400
-    
+
+# 查看单个管理员
+@admin_bp.route('/checkAdmin', methods=['POST'])
+@jwt_required()
+def checkAdmin():
+    try:
+        current_user = get_jwt_identity()
+        account = request.get_json()['account']
+        TeacherID = request.get_json()['TeacherID']
+        if check_identity(current_user,account) == False:
+            raise Exception("用户错误")
+        if TeacherID is None:
+            raise Exception("账户为空")
+        admin = admin_collection.find_one({'TeacherID':TeacherID},{'_id':0,'password':0})
+        if admin is None:
+            raise Exception("管理员不存在")
+        return jsonify(admin),200
+    except Exception as e:
+        return jsonify("发生异常",str(e)),400
+
 # 查看全部管理员
 @admin_bp.route('/checkAllAdmin', methods=['POST'])
 @jwt_required()

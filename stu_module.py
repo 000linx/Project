@@ -374,7 +374,7 @@ def get_dormitory():
         for student in roommate_info:
             if student.get('StudentID') == stuid:
                 target_student = student
-            else:
+            elif student.get('StudentID'):
                 filtered_roommates.append(student)
         if not target_student:
             raise Exception('该学生不在这个宿舍中')        
@@ -459,7 +459,6 @@ def cancel():
     try:
         data = request.get_json()
         StudentID = data['StudentID']
-        Dealtime = datetime.now().strftime("%Y-%m-%d %H:%M")
         OnlyID = data['OnlyID']
         current_user = get_jwt_identity()
         if check_identity(current_user, StudentID) == False:
@@ -467,9 +466,9 @@ def cancel():
         notice = dormitorynotice_collection.find_one({'OnlyID':OnlyID})
         if notice is None:
             raise Exception('当前通知不存在')
-        if notice['State'] == '待审核':
-            dormitorynotice_collection.update_one({'OnlyID':OnlyID},{'$set':{'State':'已撤销','Dealtime':Dealtime}})
-            return jsonify({'message':'撤销成功'}), 200
+        if notice['State'] == '待处理':
+            dormitorynotice_collection.delete_one({'OnlyID':OnlyID})
+        return jsonify({'message':'撤销成功'}), 200
     except Exception as e:
         return jsonify({"发生异常":str(e)}), 400
 

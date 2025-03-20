@@ -10,6 +10,7 @@ client = MongoClient('mongodb://localhost:27017/')
 db = client['Student_Dormitory']
 dormitory_collection = db['dormitory']
 stu_collection = db['student']
+mydormitory_collection = db['mydormitory']
 
 #  发送邮件
 common_bp.route('/SendEmail', methods=['POST'])
@@ -58,12 +59,19 @@ def findStudent():
         BedNumber = data['BedNumber']
         if DormitoryID is None or BedNumber is None:
             raise Exception("参数缺少")
-        student_info = stu_collection.find_one({"DormitoryID":DormitoryID,"BedNumber":BedNumber},{'_id':0,'BaseInfo':1})
-        if student_info is None:
-            raise Exception("学生不存在")
-        StudentName = student_info.get('BaseInfo').get('Name')
-        StudentID = student_info.get('BaseInfo').get('StudentID')
-        return jsonify({"StudentName":StudentName,"StudentID":StudentID}),200
+        dorm_info = mydormitory_collection.find_one({'DormitoryID':DormitoryID},{'_id':0,'roommatesinfo':1})
+        if dorm_info is None:
+            raise Exception("宿舍不存在") 
+        roommatesinfo = dorm_info.get('roommatesinfo')
+        for student in roommatesinfo:
+            if student.get('BedNumber') == BedNumber and student.get('StudentID'):
+                StudentName = student.get('Name')
+                StudentID = student.get('StudentID')
+                break
+            else:
+                StudentName = None
+                StudentID = None
+        return jsonify({'StudentName':StudentName,'StudentID':StudentID}),200
     except Exception as e:
         return jsonify("发生异常",str(e)),400  
         
